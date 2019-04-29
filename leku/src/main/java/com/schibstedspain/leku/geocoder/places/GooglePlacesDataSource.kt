@@ -2,7 +2,6 @@ package com.schibstedspain.leku.geocoder.places
 
 import android.annotation.SuppressLint
 import android.location.Address
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.tasks.RuntimeExecutionException
 import com.google.android.gms.tasks.Tasks
@@ -31,7 +30,7 @@ class GooglePlacesDataSource(private val geoDataClient: PlacesClient) {
         return defer {
 
             val token = AutocompleteSessionToken.newInstance()
-            val bounds = RectangularBounds.newInstance(LatLng(-5.1863822,-43.0643717), LatLng(-5.1863822,-43.0643717))
+            val bounds = RectangularBounds.newInstance(latLngBounds.southwest, latLngBounds.northeast)
             val request = FindAutocompletePredictionsRequest.builder()
                     .setLocationBias(bounds)
                     .setTypeFilter(TypeFilter.ADDRESS)
@@ -50,7 +49,6 @@ class GooglePlacesDataSource(private val geoDataClient: PlacesClient) {
 
             try {
                 val autocompletePredictions = results.result
-//                val predictionList = DataBufferUtils.freezeAndClose(autocompletePredictions)
                 val addressList = getAddressListFromPrediction(autocompletePredictions!!)
                 return@defer Observable.just(addressList)
             } catch (e: RuntimeExecutionException) {
@@ -62,7 +60,8 @@ class GooglePlacesDataSource(private val geoDataClient: PlacesClient) {
     private fun getAddressListFromPrediction(predictionList: FindAutocompletePredictionsResponse): List<Address> {
         val addressList = ArrayList<Address>()
         for (prediction in predictionList.autocompletePredictions) {
-            val placeBufferResponseTask = geoDataClient.fetchPlace(FetchPlaceRequest.newInstance(prediction.placeId,
+            val placeBufferResponseTask = geoDataClient.fetchPlace(
+                    FetchPlaceRequest.newInstance(prediction.placeId,
                     listOf(Place.Field.ADDRESS, Place.Field.ID, Place.Field.LAT_LNG, Place.Field.NAME)
             ))
             try {

@@ -95,6 +95,7 @@ const val TIME_ZONE_ID = "time_zone_id"
 const val TIME_ZONE_DISPLAY_NAME = "time_zone_display_name"
 const val MAP_STYLE = "map_style"
 const val UNNAMED_ROAD_VISIBILITY = "unnamed_road_visibility"
+const val ADDRESS_BY_FIRST_ADDRES_LINE = "address_by_first_address_line"
 private const val GEOLOC_API_KEY = "geoloc_api_key"
 private const val LOCATION_KEY = "location_key"
 private const val LAST_LOCATION_QUERY = "last_location_query"
@@ -163,6 +164,7 @@ class LocationPickerActivity : AppCompatActivity(),
     private var apiInteractor: GoogleGeocoderDataSource? = null
     private var isVoiceSearchEnabled = true
     private var isUnnamedRoadVisible = true
+    private var isAddressByFirstAddressLine = false
     private var mapStyle: Int? = null
     private lateinit var toolbar: Toolbar
     private lateinit var timeZone: TimeZone
@@ -739,6 +741,9 @@ class LocationPickerActivity : AppCompatActivity(),
         if (savedInstanceState.keySet().contains(UNNAMED_ROAD_VISIBILITY)) {
             isUnnamedRoadVisible = savedInstanceState.getBoolean(UNNAMED_ROAD_VISIBILITY, true)
         }
+        if (savedInstanceState.keySet().contains(ADDRESS_BY_FIRST_ADDRES_LINE)) {
+            isAddressByFirstAddressLine = savedInstanceState.getBoolean(ADDRESS_BY_FIRST_ADDRES_LINE, false)
+        }
         if (savedInstanceState.keySet().contains(MAP_STYLE)) {
             mapStyle = savedInstanceState.getInt(MAP_STYLE)
         }
@@ -788,6 +793,9 @@ class LocationPickerActivity : AppCompatActivity(),
         }
         if (transitionBundle.keySet().contains(UNNAMED_ROAD_VISIBILITY)) {
             isUnnamedRoadVisible = transitionBundle.getBoolean(UNNAMED_ROAD_VISIBILITY, true)
+        }
+        if (transitionBundle.keySet().contains(ADDRESS_BY_FIRST_ADDRES_LINE)) {
+            isAddressByFirstAddressLine = transitionBundle.getBoolean(ADDRESS_BY_FIRST_ADDRES_LINE, true)
         }
         if (transitionBundle.keySet().contains(MAP_STYLE)) {
             mapStyle = transitionBundle.getInt(MAP_STYLE)
@@ -1034,17 +1042,19 @@ class LocationPickerActivity : AppCompatActivity(),
     private fun updateLocationNameList(addresses: List<Address>) {
         locationNameList.clear()
         for (address in addresses) {
-//            if (address.featureName == null) {
-//                locationNameList.add(getString(R.string.leku_unknown_location))
-//            } else {
-//                locationNameList.add(getFullAddressString(address))
-//            }
-            if (address.maxAddressLineIndex == -1) {
-                locationNameList.add(getString(R.string.leku_unknown_location))
+            if (isAddressByFirstAddressLine) {
+                if (address.maxAddressLineIndex == -1) {
+                    locationNameList.add(getString(R.string.leku_unknown_location))
+                } else {
+                    locationNameList.add(address.getAddressLine(0))
+                }
             } else {
-                locationNameList.add(address.getAddressLine(0))
+                if (address.featureName == null) {
+                    locationNameList.add(getString(R.string.leku_unknown_location))
+                } else {
+                    locationNameList.add(getFullAddressString(address))
+                }
             }
-
         }
     }
 
@@ -1142,10 +1152,6 @@ class LocationPickerActivity : AppCompatActivity(),
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
 
-//        if (isGooglePlacesEnabled) {
-//            googleApiClientBuilder.addApi(Places.GEO_DATA_API)
-//        }
-
         googleApiClient = googleApiClientBuilder.build()
         googleApiClient!!.connect()
     }
@@ -1208,6 +1214,7 @@ class LocationPickerActivity : AppCompatActivity(),
         private var voiceSearchEnabled = true
         private var mapStyle: Int? = null
         private var unnamedRoadVisible = true
+        private var isAddressByFirstAddressLine = false
 
         fun withLocation(latitude: Double, longitude: Double): Builder {
             this.locationLatitude = latitude
@@ -1293,6 +1300,11 @@ class LocationPickerActivity : AppCompatActivity(),
             return this
         }
 
+        fun withAddressByFirstAddressLine(): Builder {
+            this.isAddressByFirstAddressLine = true
+            return this
+        }
+
         fun withMapStyle(@RawRes mapStyle: Int): Builder {
             this.mapStyle = mapStyle
             return this
@@ -1330,6 +1342,7 @@ class LocationPickerActivity : AppCompatActivity(),
             intent.putExtra(ENABLE_GOOGLE_TIME_ZONE, googleTimeZoneEnabled)
             intent.putExtra(ENABLE_VOICE_SEARCH, voiceSearchEnabled)
             intent.putExtra(UNNAMED_ROAD_VISIBILITY, unnamedRoadVisible)
+            intent.putExtra(ADDRESS_BY_FIRST_ADDRES_LINE, isAddressByFirstAddressLine)
 
             return intent
         }
