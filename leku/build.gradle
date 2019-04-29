@@ -84,6 +84,7 @@ dependencies {
 	  exclude group: "com.android.support"
   }
 
+  implementation 'com.google.android.libraries.places:places:1.1.0'
   implementation ("com.google.android.libraries.places:places-compat:1.0.0") {
     exclude group: "com.android.support"
   }

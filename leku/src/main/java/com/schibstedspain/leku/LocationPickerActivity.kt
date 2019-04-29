@@ -34,7 +34,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.LocationListener
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.places.Places
+//import com.google.android.gms.location.places.Places
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -59,6 +59,11 @@ import pl.charmas.android.reactivelocation2.ReactiveLocationProvider
 
 import com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL
 import com.google.android.gms.maps.GoogleMap.MAP_TYPE_SATELLITE
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.maps.GeoApiContext
 import com.schibstedspain.leku.geocoder.timezone.GoogleTimeZoneDataSource
 import com.schibstedspain.leku.locale.DefaultCountryLocaleRect
@@ -244,7 +249,8 @@ class LocationPickerActivity : AppCompatActivity(),
     }
 
     private fun setUpMainVariables() {
-        val placesDataSource = GooglePlacesDataSource(Places.getGeoDataClient(this))
+        Places.initialize(getApplicationContext(), GoogleTimeZoneDataSource.getApiKey(this)!!)
+        val placesDataSource = GooglePlacesDataSource(Places.createClient(this))
         val geocoder = Geocoder(this, Locale.getDefault())
         apiInteractor = GoogleGeocoderDataSource(NetworkClient(), AddressBuilder())
         val geocoderRepository = GeocoderRepository(AndroidGeocoderDataSource(geocoder), apiInteractor!!)
@@ -1130,9 +1136,9 @@ class LocationPickerActivity : AppCompatActivity(),
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
 
-        if (isGooglePlacesEnabled) {
-            googleApiClientBuilder.addApi(Places.GEO_DATA_API)
-        }
+//        if (isGooglePlacesEnabled) {
+//            googleApiClientBuilder.addApi(Places.GEO_DATA_API)
+//        }
 
         googleApiClient = googleApiClientBuilder.build()
         googleApiClient!!.connect()
