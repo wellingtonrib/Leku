@@ -1034,10 +1034,15 @@ class LocationPickerActivity : AppCompatActivity(),
     private fun updateLocationNameList(addresses: List<Address>) {
         locationNameList.clear()
         for (address in addresses) {
-            if (address.featureName == null) {
+//            if (address.featureName == null) {
+//                locationNameList.add(getString(R.string.leku_unknown_location))
+//            } else {
+//                locationNameList.add(getFullAddressString(address))
+//            }
+            if (address.maxAddressLineIndex == -1) {
                 locationNameList.add(getString(R.string.leku_unknown_location))
             } else {
-                locationNameList.add(getFullAddressString(address))
+                locationNameList.add(address.getAddressLine(0))
             }
         }
     }
