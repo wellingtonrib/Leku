@@ -1044,6 +1044,7 @@ class LocationPickerActivity : AppCompatActivity(),
             } else {
                 locationNameList.add(address.getAddressLine(0))
             }
+
         }
     }
 

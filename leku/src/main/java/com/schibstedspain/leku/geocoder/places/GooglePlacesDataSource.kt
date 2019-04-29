@@ -29,6 +29,7 @@ class GooglePlacesDataSource(private val geoDataClient: PlacesClient) {
 
     fun getFromLocationName(query: String, latLngBounds: LatLngBounds): Observable<List<Address>> {
         return defer {
+
             val token = AutocompleteSessionToken.newInstance()
             val bounds = RectangularBounds.newInstance(LatLng(-5.1863822,-43.0643717), LatLng(-5.1863822,-43.0643717))
             val request = FindAutocompletePredictionsRequest.builder()
